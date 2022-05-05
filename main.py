@@ -1,12 +1,14 @@
 import xml.etree.ElementTree as ET
 from typing.io import TextIO
 from Command import Command
+from os.path import exists
+import requests
 
 target_version = 3.3
 api = "gl"
 profile = "core"
 
-internal_command_prefix = "gllle_"
+internal_command_prefix = "_gl_loader_"
 
 # TODO types
 
@@ -124,7 +126,7 @@ def parse(root: ET.Element):
         commands.append(Command(name_node.text, return_type, params))
 
 
-def write_header(file: TextIO, root):
+def write_header(file: TextIO, root: ET.Element):
     # Write types
     for type in root.findall("./types/type"):
         file.write(ET.tostring(type, method='text', encoding='unicode').strip())
@@ -149,7 +151,14 @@ def write_header(file: TextIO, root):
     file.write('\n\n')
 
 
+def download_spec():
+    if not exists('gl.xml'):
+        spec = requests.get('https://www.khronos.org/registry/OpenGL/xml/gl.xml')
+        open('gl.xml', 'wb').write(spec.content)
+
+
 def main():
+    download_spec()
     tree = ET.parse("gl.xml")
     root = tree.getroot()
     parse(root)
