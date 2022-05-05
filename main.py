@@ -15,93 +15,6 @@ internal_command_prefix = "_gl_loader_"
 required_enums = []
 commands = []
 
-# lul
-lib_init_string = """
-static void* (*getProcAddressPtr)(const char*);
-
-#if defined(_WIN32) || defined(__CYGWIN__)
-#ifndef _WINDOWS_
-#undef APIENTRY
-#endif
-#include <windows.h>
-static HMODULE libGL;
-
-static int open_gl(void) {
-    libGL = LoadLibraryW(L"opengl32.dll");
-    if(libGL != NULL) {
-        void (* tmp)(void);
-        getProcAddressPtr = (void(*)(void)) GetProcAddress(libGL, "wglGetProcAddress");
-        return getProcAddressPtr != NULL;
-    }
-    return 0;
-}
-
-#else
-#include <dlfcn.h>
-static void* libGL;
-
-static int open_gl(void) {
-    static const char *NAMES[] = {"libGL.so.1", "libGL.so"};
-
-    unsigned int index = 0;
-    for(index = 0; index < (sizeof(NAMES) / sizeof(NAMES[0])); index++) {
-        libGL = dlopen(NAMES[index], RTLD_NOW | RTLD_GLOBAL);
-        if(libGL != NULL) {
-            getProcAddressPtr = dlsym(libGL, "glXGetProcAddressARB");
-            return getProcAddressPtr != NULL;
-        }
-    }
-
-    return 0;
-}
-
-#endif
-"""
-
-lib_free_string = """
-#if defined(_WIN32) || defined(__CYGWIN__)
-
-static void close_gl(void) {
-    if(libGL != NULL) {
-        FreeLibrary((HMODULE) libGL);
-        libGL = NULL;
-    }
-}
-
-#else
-
-static void close_gl(void) {
-    if(libGL != NULL) {
-        dlclose(libGL);
-        libGL = NULL;
-    }
-}
-
-#endif
-"""
-
-loader_string = """
-static void* get_proc(const char *namez) {
-    void* result = NULL;
-    if(libGL == NULL) return NULL;
-
-#if !defined(__APPLE__) && !defined(__HAIKU__)
-    if(getProcAddressPtr != NULL) {
-        result = getProcAddressPtr(namez);
-    }
-#endif
-    if(result == NULL) {
-#if defined(_WIN32) || defined(__CYGWIN__)
-        result = (void*)GetProcAddress((HMODULE) libGL, namez);
-#else
-        result = dlsym(libGL, namez);
-#endif
-    }
-
-    return result;
-}
-"""
-
 
 def parse(root: ET.Element):
     for feature in root.findall(f"./feature[@api='{api}']"):
@@ -143,7 +56,7 @@ def write_header(file: TextIO, root: ET.Element):
     file.write('\n\n')
 
     # Function loader declaration
-    file.write('int loadGL();\n')
+    file.write('void loadGL();\n')
 
     # Write commands
     for command in commands:
@@ -159,8 +72,7 @@ def download_spec():
 
 def main():
     download_spec()
-    tree = ET.parse("gl.xml")
-    root = tree.getroot()
+    root = ET.parse("gl.xml").getroot()
     parse(root)
 
     header_file = open("GL.h", mode='w')
@@ -179,6 +91,16 @@ def main():
     source_file = open("GL.cpp", mode='w')
     source_file.write('#include <GL.h>\n')
 
+    with open('Sources/PlatformConfig.h') as f:
+        for line in f:
+            source_file.write(line)
+    source_file.write('\n\n')
+
+    with open('Sources/LibraryHandler.cpp') as f:
+        for line in f:
+            source_file.write(line)
+    source_file.write('\n\n')
+
     for command in commands:
         source_file.write(command.typedef())
         source_file.write(command.pointer_definition())
@@ -188,18 +110,11 @@ def main():
         source_file.write(command.wrapper_definition())
     source_file.write('\n\n')
 
-    # LUL
-    source_file.write(lib_init_string)
-    source_file.write(lib_free_string)
-    source_file.write(loader_string)
-    source_file.write('\n\n')
-
-    source_file.write('int loadGL(){\n')
+    source_file.write('void loadGL(){\n')
     source_file.write("\topen_gl();\n")
     for command in commands:
         source_file.write(command.loader())
     source_file.write("\tclose_gl();\n")
-    source_file.write("\treturn 1;\n")
     source_file.write('}\n')
     source_file.close()
 
