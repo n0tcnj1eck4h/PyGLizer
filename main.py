@@ -58,9 +58,14 @@ def write_header(file: TextIO, root: ET.Element):
     # Function loader declaration
     file.write('void loadGL();\n')
 
+    for command in commands:
+        file.write(command.typedef())
+        file.write(command.pointer_declaration())
+    file.write('\n\n')
+
     # Write commands
     for command in commands:
-        file.write(command.wrapper_declaration())
+        file.write(command.wrapper_definition())
     file.write('\n\n')
 
 
@@ -102,6 +107,7 @@ def main():
     # --- Implementation ---
     source_file = open("GL.cpp", mode='w')
     source_file.write('#include <GL.h>\n')
+    source_file.write('#define NULL 0\n')
 
     with open('Sources/PlatformConfig.h') as f:
         for line in f:
@@ -114,13 +120,12 @@ def main():
     source_file.write('\n\n')
 
     for command in commands:
-        source_file.write(command.typedef())
         source_file.write(command.pointer_definition())
     source_file.write('\n\n')
 
-    for command in commands:
-        source_file.write(command.wrapper_definition())
-    source_file.write('\n\n')
+    #for command in commands:
+    #    source_file.write(command.wrapper_definition())
+    #source_file.write('\n\n')
 
     source_file.write('void loadGL(){\n')
     source_file.write("\topen_gl();\n")

@@ -18,12 +18,15 @@ class Command:
         return f'{INTERNAL_COMMAND_PREFIX}{self.name.lower()}'
 
     def pointer_declaration(self):  # unused most likely
-        return f'{self.pointer_typedef_name()} {self.internal_pointer_name()};\n'
+        return f'extern {self.pointer_typedef_name()} {self.internal_pointer_name()};\n'
 
     def pointer_definition(self):
-        return f'{self.pointer_typedef_name()} {self.internal_pointer_name()} = NULL;\n'
+        return f'{self.pointer_typedef_name()} {self.internal_pointer_name()} = nullptr;\n'
 
-    def wrapper_declaration(self):
+    def pointer_initialization(self):
+        return f'{self.internal_pointer_name()} = nullptr;\n'
+
+    def wrapper_declaration(self):  # unused due to c++ being weird about inline functions FIXME
         return f'{self.return_type} {self.name}({ ", ".join(map(str, self.arguments))});\n'
 
     def wrapper_definition(self):

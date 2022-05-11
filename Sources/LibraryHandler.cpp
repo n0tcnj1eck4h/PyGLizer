@@ -21,8 +21,8 @@ static int open_gl(void) {
     static const char *NAMES[] = {"libGL.so.1", "libGL.so"};
     for(int i = 0; i < (sizeof(NAMES) / sizeof(NAMES[0])); i++) {
         libGL = dlopen(NAMES[i], RTLD_NOW | RTLD_GLOBAL);
-        if(libGL != NULL) {
-            getProcAddressPtr = dlsym(libGL, "glXGetProcAddressARB");
+        if(libGL != NULL) { // FIXME: crazy hack
+            getProcAddressPtr = (decltype(getProcAddressPtr))dlsym(libGL, "glXGetProcAddressARB");
             return getProcAddressPtr != NULL;
         }
     }

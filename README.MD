@@ -25,7 +25,29 @@ None of the arguments are required. By default, a header for the latest core ver
 
 **If you're using [glfw](https://www.glfw.org/) in your project, include the GL.h header before it!**
 
-TODO: EXAMPLE CODE GOES HERE 
+### Example usage
+```c
+#include "GL.h"
+#include "GLFW/glfw3.h"
+
+int main() {
+    glfwInit();
+    GLFWwindow* window = glfwCreateWindow(1080, 720, "Window", NULL, NULL);
+    glfwMakeContextCurrent(window);
+
+    loadGL();
+    glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
+
+    while(!glfwWindowShouldClose(window)) {
+        glfwPollEvents();
+        glClear(GL_COLOR_BUFFER_BIT);
+        glfwSwapBuffers(window);
+    }
+    
+    glfwTerminate();
+    return 0;
+}
+```
 
 ## (Planned) Features / TODO's
 - [x] Make it work
