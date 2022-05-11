@@ -1,6 +1,5 @@
 from Argument import Argument
-
-internal_command_prefix = "gllle_"
+from config import *
 
 
 class Command:
@@ -16,7 +15,7 @@ class Command:
         return f'typedef {self.return_type} (APIENTRY *{self.pointer_typedef_name()})({ ", ".join(map(str, self.arguments))});\n'  # apientry?
 
     def internal_pointer_name(self):
-        return f'{internal_command_prefix}{self.name.lower()}'
+        return f'{INTERNAL_COMMAND_PREFIX}{self.name.lower()}'
 
     def pointer_declaration(self):  # unused most likely
         return f'{self.pointer_typedef_name()} {self.internal_pointer_name()};\n'

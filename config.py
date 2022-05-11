@@ -1,0 +1,4 @@
+TARGET_VERSION = 3.3
+API = 'gl'
+PROFILE = 'core'
+INTERNAL_COMMAND_PREFIX = "_gl_loader_"
