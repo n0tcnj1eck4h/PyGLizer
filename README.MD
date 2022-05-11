@@ -21,7 +21,7 @@ options:
   --profile {core, compatibility}
   --version VERSION
 ```
-None of the arguments are required. By default, a header for the lastest core version of OpenGL gets generated.
+None of the arguments are required. By default, a header for the latest core version of OpenGL gets generated.
 
 **If you're using [glfw](https://www.glfw.org/) in your project, include the GL.h header before it!**
 
@@ -29,12 +29,13 @@ TODO: EXAMPLE CODE GOES HERE
 
 ## (Planned) Features / TODO's
 - [x] Make it work
+- [ ] Write my own library handling functions (For now they are ~~stolen from~~ heavily inspired by glad)
 - [ ] Typed enums
-- [ ] Seperate generators for C/C++
+- [ ] Separate generators for C/C++
 - [ ] Figure out what APIENTRY is
 - [ ] Documentation generator
 - [ ] Cleanup
-- [ ] Debbuging/Profiling stuff
+- [ ] Debugging/Profiling stuff
 - [ ] Error handing
 - [ ] How do I deal with extensions
 - [ ] OSX support
