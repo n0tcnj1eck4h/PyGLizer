@@ -5,7 +5,7 @@ This repository contains my attempt at making an OpenGL Loader in Python for C/C
 Unlike [glad](https://github.com/Dav1dde/glad), this generator uses inline functions instead of `#define`'s, which allows for less awkward autocompletion in most IDE's.
 
 
-The script downloads the lasted [OpenGL spec](https://www.khronos.org/registry/OpenGL/xml/) from the web, parses it, and outputs two files:
+The script downloads the latest [OpenGL spec](https://www.khronos.org/registry/OpenGL/xml/) from the web, parses it, and outputs two files:
 - GL.h - Header containing GL types, GL functions and a loader. This file should be placed in the `include` directory of your project.
 - GL.cpp - File containing everything else. Add it to your source files.
 ## Usage
