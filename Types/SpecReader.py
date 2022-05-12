@@ -17,6 +17,7 @@ class SpecReader:
         download_spec()
         self.root = ET.parse("../gl.xml").getroot()
         self.required_enums: list[str] = []
+        self.required_commands: list[str] = []
         self.enums: list[Enum] = []
         self.commands: list[Command] = []
 
@@ -44,6 +45,9 @@ class SpecReader:
             for requirement in feature.findall('./require/enum'):
                 self.required_enums.append(requirement.attrib['name'])
 
+            for requirement in feature.findall('./require/command'):
+                self.required_commands.append(requirement.attrib['name'])
+
         for required_enum in self.required_enums:
             enum_node = self.root.find(f"./enums/enum[@name='{required_enum}']")
             enum = Enum(enum_node.attrib['name'], enum_node.attrib['value'])
@@ -51,16 +55,17 @@ class SpecReader:
                 enum.group = enum_node.attrib['group']
             self.enums.append(enum)
 
-        # Read commands
         for command_node in self.root.findall("./commands/command"):
             name_node = command_node.find('./proto/name')
-            # Check if we require this command for target version
-            # FIXME something is not right here
-            if self.root.find(f"./feature[@api='{config.API}']/require/command[@name='{name_node.text}']") is None:
+            command_name = name_node.text
+            if command_name not in self.required_commands:
                 continue
+
             type_node = command_node.find('./proto/ptype')
             return_type = type_node.text if type_node is not None else 'void'
+
             params = []
             for param_node in command_node.findall('./param'):
                 params.append(ET.tostring(param_node, method='text', encoding='unicode').strip())
-            self.commands.append(Command(name_node.text, return_type, params))
+
+            self.commands.append(Command(command_name, return_type, params))
