@@ -39,7 +39,7 @@ def write_header(file: TextIO, spec: SpecReader):
 
 def main():
     arg_parser = argparse.ArgumentParser(description='Generate an OpenGL Loader header.')
-    arg_parser.add_argument('--api', action='store', default='gl', choices=['gl'])
+    arg_parser.add_argument('--api', action='store', default='gl', choices=['gl', 'gles1', 'gles2', 'glsc2'])
     arg_parser.add_argument('--profile', action='store', default='core', choices=['core', 'compatibility'])
     arg_parser.add_argument('--version', action='store', default='latest')
     arg_parser.add_argument('--target-language', action='store', default='cpp', choices=['cpp', 'c'])
