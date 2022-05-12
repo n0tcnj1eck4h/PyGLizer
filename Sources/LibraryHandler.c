@@ -9,7 +9,7 @@ static int open_gl(void) {
     libGL = LoadLibraryW(L"opengl32.dll");
     if(libGL != NULL) {
         void (* tmp)(void);
-        getProcAddressPtr = (void(*)(const char*)) GetProcAddress(libGL, "wglGetProcAddress");
+        getProcAddressPtr = (void*(*)(const char*)) GetProcAddress(libGL, "wglGetProcAddress");
         return getProcAddressPtr != NULL;
     }
     return 0;
@@ -22,7 +22,7 @@ static int open_gl(void) {
     for(int i = 0; i < (sizeof(NAMES) / sizeof(NAMES[0])); i++) {
         libGL = dlopen(NAMES[i], RTLD_NOW | RTLD_GLOBAL);
         if(libGL != NULL) {
-            getProcAddressPtr = (void(*)(const char*)) dlsym(libGL, "glXGetProcAddressARB");
+            getProcAddressPtr = (void*(*)(const char*)) dlsym(libGL, "glXGetProcAddressARB");
             return getProcAddressPtr != NULL;
         }
     }
