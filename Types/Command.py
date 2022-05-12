@@ -1,4 +1,4 @@
-from Argument import Argument
+from Types.Argument import Argument
 from config import *
 
 

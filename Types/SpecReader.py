@@ -1,21 +1,21 @@
 import xml.etree.ElementTree as ET
 from os.path import exists
-from Command import Command
-from Enum import Enum
+from Types.Command import Command
+from Types.Enum import Enum
 import requests
 import config
 
 
 def download_spec():
-    if not exists('gl.xml'):
+    if not exists('../gl.xml'):
         spec = requests.get('https://www.khronos.org/registry/OpenGL/xml/gl.xml')
-        open('gl.xml', 'wb').write(spec.content)
+        open('../gl.xml', 'wb').write(spec.content)
 
 
 class SpecReader:
     def __init__(self):
         download_spec()
-        self.root = ET.parse("gl.xml").getroot()
+        self.root = ET.parse("../gl.xml").getroot()
         self.required_enums: list[str] = []
         self.enums: list[Enum] = []
         self.commands: list[Command] = []

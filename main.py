@@ -2,7 +2,7 @@
 
 import xml.etree.ElementTree as ET
 from typing.io import TextIO
-from SpecReader import SpecReader
+from Types.SpecReader import SpecReader
 import argparse
 import config
 
