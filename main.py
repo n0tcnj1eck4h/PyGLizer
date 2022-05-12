@@ -10,17 +10,13 @@ import config
 def write_header(file: TextIO, spec: SpecReader):
     # Write types
     for type in spec.root.findall("./types/type"):
-        file.write(ET.tostring(type, method='text', encoding='unicode').strip())
+        file.write(ET.tostring(type, method='text', encoding='unicode').strip())  # this is stupid
         file.write('\n')
     file.write('\n\n')  # TODO apientry
 
     # Write enums
-    for enum in spec.required_enums:
-        enum_node = spec.root.find(f"./enums/enum[@name='{enum}']")
-        if enum_node is None:
-            print('Failed to find', enum)
-            exit()
-        file.write(f'#define {enum_node.attrib["name"]} {enum_node.attrib["value"]}\n')
+    for enum in spec.enums:
+        file.write(f'#define {enum.name} {enum.value}\n')
     file.write('\n\n')
 
     # Function loader declaration
