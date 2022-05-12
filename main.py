@@ -47,6 +47,9 @@ def main():
     if args.target_language == 'cpp':
         from Generators.Cpp.Generator import Generator
         Generator(spec).write_files()
+    elif args.target_language == 'c':
+        from Generators.C.Generator import Generator
+        Generator(spec).write_files()
     else:
         print('{} is not supported'.format(args.target_language))
         arg_parser.exit(0)
