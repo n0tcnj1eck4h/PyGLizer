@@ -26,6 +26,14 @@ class SpecReader:
         available_versions.sort()
         return available_versions
 
+    def get_apis(self) -> list[str]:  # TODO this does not work properly
+        available_apis = set()
+        for feature in self.root.findall(f"./feature"):
+            available_apis.add(feature.attrib['api'])
+        available_apis = list(available_apis)
+        available_apis.sort()
+        return available_apis
+
     def parse(self):
         for feature in self.root.findall(f"./feature[@api='{config.API}']"):
             if feature.attrib['number'] > config.TARGET_VERSION:

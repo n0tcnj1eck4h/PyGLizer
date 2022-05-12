@@ -38,7 +38,6 @@ def write_header(file: TextIO, spec: SpecReader):
 
 
 def main():
-
     arg_parser = argparse.ArgumentParser(description='Generate an OpenGL Loader header.')
     arg_parser.add_argument('--api', action='store', default='gl', choices=['gl'])
     arg_parser.add_argument('--profile', action='store', default='core', choices=['core', 'compatibility'])
@@ -49,10 +48,22 @@ def main():
 
     # TODO Separate version major, minor
     spec = SpecReader()
-    versions = spec.get_versions(config.API)
 
-    config.API = args.api
-    config.PROFILE = args.profile
+    available_apis = spec.get_apis()
+    print('Available OpenGL API\'s: {}'.format(', '.join(available_apis)))
+
+    if args.api.lower() in available_apis:
+        config.API = args.api.lower()
+    else:
+        print('No such API exists ({})'.format(args.api))
+        arg_parser.exit(0)
+
+    print('Selected API: {}'.format(config.API))
+
+    config.PROFILE = args.profile  # argparse already sanitizes the input
+    print('Selected profile: {}'.format(config.PROFILE))
+
+    versions = spec.get_versions(config.API)
     config.TARGET_VERSION = versions[-1] if args.version == 'latest' else \
         ([versions[0]] + [x for x in versions if x <= args.version])[-1]  # hmmm yes this is very evil
 
