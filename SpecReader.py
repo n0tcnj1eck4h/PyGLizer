@@ -12,18 +12,23 @@ def download_spec():
 
 
 class SpecReader:
-    def __init__(self, file):
+    def __init__(self):
         download_spec()
         self.root = ET.parse("gl.xml").getroot()
         self.required_enums = []
         self.commands = []
 
-    def get_versions(self, api):
-        pass
+    def get_versions(self, api) -> list[str]:
+        available_versions = set()
+        for feature in self.root.findall(f"./feature[@api='{api}']"):
+            available_versions.add(feature.attrib['number'])
+        available_versions = list(available_versions)
+        available_versions.sort()
+        return available_versions
 
     def parse(self):
         for feature in self.root.findall(f"./feature[@api='{config.API}']"):
-            if float(feature.attrib['number']) > config.TARGET_VERSION:
+            if feature.attrib['number'] > config.TARGET_VERSION:
                 continue
 
             # Enums

@@ -38,19 +38,31 @@ def write_header(file: TextIO, spec: SpecReader):
 
 
 def main():
+
     arg_parser = argparse.ArgumentParser(description='Generate an OpenGL Loader header.')
-    arg_parser.add_argument('--api', action='store', default='gl', choices=['todo get apis'])
+    arg_parser.add_argument('--api', action='store', default='gl', choices=['gl'])
     arg_parser.add_argument('--profile', action='store', default='core', choices=['core', 'compatibility'])
     arg_parser.add_argument('--version', action='store', default='latest')
     arg_parser.add_argument('--target-language', action='store', default='cpp', choices=['cpp', 'c'])
     arg_parser.add_argument('--use-typed-enums', action='store_true')
-
     args = arg_parser.parse_args()
+
+    # TODO Separate version major, minor
+    spec = SpecReader()
+    versions = spec.get_versions(config.API)
+
     config.API = args.api
     config.PROFILE = args.profile
-    config.TARGET_VERSION = float('inf') if args.version == 'latest' else float(args.version)
+    config.TARGET_VERSION = versions[-1] if args.version == 'latest' else \
+        ([versions[0]] + [x for x in versions if x <= args.version])[-1]  # hmmm yes this is very evil
 
-    spec = SpecReader('gl.xml')
+    print('Available versions for OpenGL profile {}: {}'.format(config.PROFILE, ', '.join(map(str, versions))))
+    print('Selected version: {}'.format(config.TARGET_VERSION))
+    if config.TARGET_VERSION not in versions:
+        print("No such version exists!")
+        arg_parser.exit(0)
+
+    print('Generating loader...')
     spec.parse()
 
     header_file = open("GL.h", mode='w')
@@ -95,6 +107,8 @@ def main():
     source_file.write("\tclose_gl();\n")
     source_file.write('}\n')
     source_file.close()
+
+    print('Done!')
     arg_parser.exit(0)
 
 
