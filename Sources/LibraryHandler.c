@@ -9,7 +9,7 @@ static int open_gl(void) {
     libGL = LoadLibraryW(L"opengl32.dll");
     if(libGL != NULL) {
         void (* tmp)(void);
-        getProcAddressPtr = (void(*)(void)) GetProcAddress(libGL, "wglGetProcAddress");
+        getProcAddressPtr = (void(*)(const char*)) GetProcAddress(libGL, "wglGetProcAddress");
         return getProcAddressPtr != NULL;
     }
     return 0;
@@ -21,8 +21,8 @@ static int open_gl(void) {
     static const char *NAMES[] = {"libGL.so.1", "libGL.so"};
     for(int i = 0; i < (sizeof(NAMES) / sizeof(NAMES[0])); i++) {
         libGL = dlopen(NAMES[i], RTLD_NOW | RTLD_GLOBAL);
-        if(libGL != NULL) { // FIXME: crazy hack
-            getProcAddressPtr = dlsym(libGL, "glXGetProcAddressARB");
+        if(libGL != NULL) {
+            getProcAddressPtr = (void(*)(const char*)) dlsym(libGL, "glXGetProcAddressARB");
             return getProcAddressPtr != NULL;
         }
     }
@@ -56,7 +56,7 @@ static void* get_proc(const char *namez) {
         result = getProcAddressPtr(namez);
     }
     if(result == NULL) {
-#if _GL_LOADER_PLATFORM_WINDOWS
+#ifdef _GL_LOADER_PLATFORM_WINDOWS
         result = (void*)GetProcAddress((HMODULE) libGL, namez);
 #else
         result = dlsym(libGL, namez);
