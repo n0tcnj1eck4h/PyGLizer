@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-
 from Types.SpecReader import SpecReader
-from Generators.GeneratorBase import GeneratorBase
 import argparse
 import config
 
@@ -46,12 +44,9 @@ def main():
     print('Generating loader...')
     spec.parse()
 
-    generator: GeneratorBase
-
     if args.target_language == 'cpp':
         from Generators.Cpp.Generator import Generator
-        generator = Generator(spec)
-        generator.write_files()
+        Generator(spec).write_files()
     else:
         print('{} is not supported'.format(args.target_language))
         arg_parser.exit(0)

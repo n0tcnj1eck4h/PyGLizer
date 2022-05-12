@@ -1,5 +1,7 @@
+import config
 from Generators.GeneratorBase import GeneratorBase
 import xml.etree.ElementTree as ET
+from Types.Command import Command
 
 
 class Generator(GeneratorBase):
@@ -28,13 +30,13 @@ class Generator(GeneratorBase):
         file.write('void loadGL();\n')
 
         for command in self.spec.commands:
-            file.write(command.typedef())
-            file.write(command.pointer_declaration())
+            file.write(self.typedef(command))
+            file.write(self.pointer_declaration(command))
         file.write('\n\n')
 
         # Write commands
         for command in self.spec.commands:
-            file.write(command.wrapper_definition())
+            file.write(self.wrapper_definition(command))
         file.write('\n\n')
         file.write('#endif\n')
         file.close()
@@ -55,14 +57,50 @@ class Generator(GeneratorBase):
         source_file.write('\n\n')
 
         for command in self.spec.commands:
-            source_file.write(command.pointer_definition())
+            source_file.write(self.pointer_definition(command))
         source_file.write('\n\n')
 
         source_file.write('void loadGL(){\n')
         source_file.write("\topen_gl();\n")
         for command in self.spec.commands:
-            source_file.write(command.loader())
+            source_file.write(self.loader(command))
         source_file.write("\tclose_gl();\n")
         source_file.write('}\n')
         source_file.close()
 
+    # everything below this line is absolutely unhinged
+    @staticmethod
+    def pointer_typedef_name(command: Command):
+        return f'PFN{command.name.upper()}PROC'
+
+    @staticmethod
+    def typedef(command: Command):
+        return f'typedef {command.return_type} (APIENTRY *{Generator.pointer_typedef_name(command)})\
+        ({", ".join(map(str, command.arguments))});\n'  # apientry?
+
+    @staticmethod
+    def internal_pointer_name(command: Command):
+        return f'{config.INTERNAL_COMMAND_PREFIX}{command.name.lower()}'
+
+    @staticmethod
+    def pointer_declaration(command: Command):  # unused most likely
+        return f'extern {Generator.pointer_typedef_name(command)} {Generator.internal_pointer_name(command)};\n'
+
+    @staticmethod
+    def pointer_definition(command: Command):
+        return f'{Generator.pointer_typedef_name(command)} {Generator.internal_pointer_name(command)} = nullptr;\n'
+
+    @staticmethod
+    def pointer_initialization(command: Command):
+        return f'{Generator.internal_pointer_name(command)} = nullptr;\n'
+
+    @staticmethod
+    def wrapper_definition(command: Command):
+        return f'inline {command.return_type} {command.name}({", ".join(map(str, command.arguments))})' \
+               f'{{return {Generator.internal_pointer_name(command)}\
+               ({", ".join(list(map(lambda x: x.name, command.arguments)))});}}\n'
+
+    @staticmethod
+    def loader(command: Command):
+        return f'\t{Generator.internal_pointer_name(command)} = \
+        ({Generator.pointer_typedef_name(command)})get_proc("{command.name}");\n'
