@@ -3,3 +3,4 @@
 /gl.xml
 *.o
 /Example/out
+Output/*
