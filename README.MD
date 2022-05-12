@@ -6,24 +6,25 @@ Unlike [glad](https://github.com/Dav1dde/glad), this generator uses inline funct
 
 
 The script downloads the latest [OpenGL spec](https://www.khronos.org/registry/OpenGL/xml/) from the web, parses it, and outputs two files:
-- GL.h - Header containing GL types, GL functions and a loader. This file should be placed in the `include` directory of your project.
-- GL.cpp - File containing everything else. Add it to your source files.
+- GL.h/hpp - Header containing GL types, GL functions and a loader. This file should be placed in the `include` directory of your project.
+- GL.c/cpp - File containing everything else. Add it to your source files.
 ## Usage
 ```text
-./main.py -h           
-usage: main.py [-h] [--api API] [--profile {core, compatibility}] [--version VERSION]
+./main.py -h
+usage: main.py [-h] [--api {gl,gles1,gles2,glsc2}] [--profile {core,compatibility}] [--version VERSION] [--target-language {cpp,c}]
 
 Generate an OpenGL Loader header.
 
 options:
   -h, --help            show this help message and exit
-  --api {gl, egl ...}
-  --profile {core, compatibility}
+  --api {gl,gles1,gles2,glsc2}
+  --profile {core,compatibility}
   --version VERSION
+  --target-language {cpp,c}
 ```
 None of the arguments are required. By default, a header for the latest core version of OpenGL gets generated.
 
-**If you're using [glfw](https://www.glfw.org/) in your project, include the GL.h header before it!**
+**If you're using [glfw](https://www.glfw.org/) in your project, include the GL.h/hpp header before it!**
 
 ### Example usage
 ```c
@@ -51,9 +52,9 @@ int main() {
 
 ## (Planned) Features / TODO's
 - [x] Make it work
+- [x] Separate generators for C/C++
 - [ ] Write my own library handling functions (For now they are ~~stolen from~~ heavily inspired by glad)
 - [ ] Typed enums
-- [ ] Separate generators for C/C++
 - [ ] Figure out what APIENTRY is
 - [ ] Documentation generator
 - [ ] Cleanup
