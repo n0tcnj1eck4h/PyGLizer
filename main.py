@@ -33,11 +33,7 @@ def main():
     available_apis = spec_reader.get_apis()
     print('Available OpenGL API\'s: {}'.format(', '.join(available_apis)))
 
-    if args.api.lower() in available_apis:
-        config.API = args.api.lower()
-    else:
-        print('No such API exists ({})'.format(args.api))
-        arg_parser.exit(0)
+    config.API = args.api.lower()
 
     print('Selected API: {}'.format(config.API))
 
