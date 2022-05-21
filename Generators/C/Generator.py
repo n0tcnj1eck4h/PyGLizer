@@ -17,9 +17,8 @@ class Generator(GeneratorBase):
         file.write("#ifndef _WINDOWS_\n#undef APIENTRY\n#define APIENTRY\n#endif\n\n")  # whatever
         file.write('#include <stddef.h>\n')
 
-
-        for type in self.spec.root.findall("./types/type"):
-            file.write(ET.tostring(type, method='text', encoding='unicode').strip())  # this is stupid
+        for type in self.spec.types:
+            file.write(type)
             file.write('\n')
         file.write('\n\n')  # TODO apientry
 

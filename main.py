@@ -26,11 +26,11 @@ def main():
     download_spec()
 
     # TODO Separate version major, minor
-    spec = SpecReader('gl.xml')
+    spec_reader = SpecReader('gl.xml')
     spec_wgl = SpecReader('wgl.xml')
     spec_glx = SpecReader('glx.xml')
 
-    available_apis = spec.get_apis()
+    available_apis = spec_reader.get_apis()
     print('Available OpenGL API\'s: {}'.format(', '.join(available_apis)))
 
     if args.api.lower() in available_apis:
@@ -44,7 +44,7 @@ def main():
     config.PROFILE = args.profile  # argparse already sanitizes the input
     print('Selected profile: {}'.format(config.PROFILE))
 
-    versions = spec.get_versions(config.API)
+    versions = spec_reader.get_versions(config.API)
     config.TARGET_VERSION = versions[-1] if args.version == 'latest' else \
         ([versions[0]] + [x for x in versions if x <= args.version])[-1]  # hmmm yes this is very evil
 
@@ -56,9 +56,7 @@ def main():
 
     print('Generating loader...')
 
-    spec.parse(config.API, config.TARGET_VERSION)
-    #spec_wgl.parse('wgl', spec_wgl.get_versions('wgl')[-1])
-    #spec_glx.parse('glx', spec_wgl.get_versions('glx')[-1])
+    spec = spec_reader.parse(config.API, config.TARGET_VERSION)
 
     if args.target_language == 'cpp':
         from Generators.Cpp.Generator import Generator
