@@ -1,21 +1,11 @@
 import xml.etree.ElementTree as ET
-from os.path import exists
 from Types.Command import Command
 from Types.Enum import Enum
-import requests
-import config
-
-
-def download_spec():
-    if not exists('../gl.xml'):
-        spec = requests.get('https://www.khronos.org/registry/OpenGL/xml/gl.xml')
-        open('../gl.xml', 'wb').write(spec.content)
 
 
 class SpecReader:
-    def __init__(self):
-        download_spec()
-        self.root = ET.parse("../gl.xml").getroot()
+    def __init__(self, file):
+        self.root = ET.parse(file).getroot()
         self.required_enums: list[str] = []
         self.required_commands: list[str] = []
         self.enums: list[Enum] = []
@@ -37,9 +27,9 @@ class SpecReader:
         available_apis.sort()
         return available_apis
 
-    def parse(self):
-        for feature in self.root.findall(f"./feature[@api='{config.API}']"):
-            if feature.attrib['number'] > config.TARGET_VERSION:
+    def parse(self, target_api, target_version):
+        for feature in self.root.findall(f"./feature[@api='{target_api}']"):
+            if feature.attrib['number'] > target_version:
                 continue
 
             for requirement in feature.findall('./require/enum'):

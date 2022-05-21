@@ -1,8 +1,17 @@
 #!/usr/bin/env python3
 
 from Types.SpecReader import SpecReader
+from os.path import exists
+import requests
 import argparse
 import config
+
+
+def download_spec():
+    for file in ('gl.xml', 'wgl.xml', 'glx.xml'):
+        if not exists(file):
+            spec = requests.get('https://www.khronos.org/registry/OpenGL/xml/{}'.format(file))
+            open(file, 'wb').write(spec.content)
 
 
 def main():
@@ -14,8 +23,12 @@ def main():
     arg_parser.add_argument('--use-typed-enums', action='store_true')
     args = arg_parser.parse_args()
 
+    download_spec()
+
     # TODO Separate version major, minor
-    spec = SpecReader()
+    spec = SpecReader('gl.xml')
+    spec_wgl = SpecReader('wgl.xml')
+    spec_glx = SpecReader('glx.xml')
 
     available_apis = spec.get_apis()
     print('Available OpenGL API\'s: {}'.format(', '.join(available_apis)))
@@ -42,7 +55,10 @@ def main():
         arg_parser.exit(0)
 
     print('Generating loader...')
-    spec.parse()
+
+    spec.parse(config.API, config.TARGET_VERSION)
+    #spec_wgl.parse('wgl', spec_wgl.get_versions('wgl')[-1])
+    #spec_glx.parse('glx', spec_wgl.get_versions('glx')[-1])
 
     if args.target_language == 'cpp':
         from Generators.Cpp.Generator import Generator
