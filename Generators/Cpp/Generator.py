@@ -75,8 +75,8 @@ class Generator(GeneratorBase):
 
     @staticmethod
     def typedef(command: Command):
-        return f'typedef {command.return_type} (APIENTRY *{Generator.pointer_typedef_name(command)})\
-        ({", ".join(map(str, command.arguments))});\n'  # apientry?
+        return f'typedef {command.return_type} (APIENTRY *{Generator.pointer_typedef_name(command)})' + \
+               f'({", ".join(map(str, command.arguments))});\n'  # apientry?
 
     @staticmethod
     def internal_pointer_name(command: Command):
@@ -92,11 +92,11 @@ class Generator(GeneratorBase):
 
     @staticmethod
     def wrapper_definition(command: Command):
-        return f'inline {command.return_type} {command.name}({", ".join(map(str, command.arguments))})' \
-               f'{{return {Generator.internal_pointer_name(command)}\
-               ({", ".join(list(map(lambda x: x.name, command.arguments)))});}}\n'
+        return f'inline {command.return_type} {command.name}({", ".join(map(str, command.arguments))})' + \
+               f'{{return {Generator.internal_pointer_name(command)}' + \
+               f'({", ".join(list(map(lambda x: x.name, command.arguments)))});}}\n'
 
     @staticmethod
     def loader(command: Command):
-        return f'\t{Generator.internal_pointer_name(command)} = \
-        ({Generator.pointer_typedef_name(command)})get_proc("{command.name}");\n'
+        return f'\t{Generator.internal_pointer_name(command)} = ' + \
+               f'({Generator.pointer_typedef_name(command)})get_proc("{command.name}");\n'
