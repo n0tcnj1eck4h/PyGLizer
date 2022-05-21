@@ -1,6 +1,5 @@
 import config
 from Generators.GeneratorBase import GeneratorBase
-import xml.etree.ElementTree as ET
 from Types.Command import Command
 
 
@@ -10,9 +9,10 @@ class Generator(GeneratorBase):
         self.write_sources()
 
     def write_header(self):
-        file = open("Output/GL.hpp", mode='w')
-        file.write('#ifndef GLLLE_H\n')
-        file.write('#define GLLLE_H\n')
+        spec_name = self.spec.spec.upper()
+        file = open('Output/{}.hpp'.format(spec_name), mode='w')
+        file.write('#ifndef {}_H\n'.format(spec_name))
+        file.write('#define {}_H\n'.format(spec_name))
         file.write('#define GLFW_INCLUDE_NONE\n')
         file.write("#ifndef _WINDOWS_\n#undef APIENTRY\n#define APIENTRY\n#endif\n\n")  # whatever
 
@@ -26,8 +26,8 @@ class Generator(GeneratorBase):
             file.write(f'#define {enum.name} {enum.value}\n')
         file.write('\n\n')
 
-        # Function loader declaration
-        file.write('void loadGL();\n')
+        if config.GENERATE_LOADER:
+            file.write('void load{}();\n'.format(spec_name))
 
         for command in self.spec.commands:
             file.write(self.typedef(command))
@@ -42,8 +42,9 @@ class Generator(GeneratorBase):
         file.close()
 
     def write_sources(self):
-        source_file = open("Output/GL.cpp", mode='w')
-        source_file.write('#include <GL.hpp>\n')
+        spec_name = self.spec.spec.upper()
+        source_file = open('Output/{}.cpp'.format(spec_name), mode='w')
+        source_file.write('#include <{}.hpp>\n'.format(spec_name))
         source_file.write('#define NULL 0\n')
 
         with open('Sources/PlatformConfig.h') as f:
@@ -60,12 +61,14 @@ class Generator(GeneratorBase):
             source_file.write(self.pointer_definition(command))
         source_file.write('\n\n')
 
-        source_file.write('void loadGL(){\n')
-        source_file.write("\topen_gl();\n")
-        for command in self.spec.commands:
-            source_file.write(self.loader(command))
-        source_file.write("\tclose_gl();\n")
-        source_file.write('}\n')
+        if config.GENERATE_LOADER:
+            source_file.write(f'void load{spec_name}(){{\n')
+            source_file.write("\topen_gl();\n")
+            for command in self.spec.commands:
+                source_file.write(self.loader(command))
+            source_file.write("\tclose_gl();\n")
+            source_file.write('}\n')
+
         source_file.close()
 
     # everything below this line is absolutely unhinged

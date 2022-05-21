@@ -3,7 +3,8 @@ from Types.Command import Command
 
 
 class Spec:
-    def __init__(self, enums, commands, api, version, types):
+    def __init__(self, spec, enums, commands, api, version, types):
+        self.spec: str = spec
         self.enums: list[Enum] = enums
         self.commands: list[Command] = commands
         self.api: str = api

@@ -16,28 +16,33 @@ def download_spec():
 
 def main():
     arg_parser = argparse.ArgumentParser(description='Generate an OpenGL Loader header.')
+    arg_parser.add_argument('--spec', action='store', default='gl', choices=['gl', 'wgl', 'glx'])
     arg_parser.add_argument('--api', action='store', default='gl', choices=['gl', 'gles1', 'gles2', 'glsc2'])
     arg_parser.add_argument('--profile', action='store', default='core', choices=['core', 'compatibility'])
     arg_parser.add_argument('--version', action='store', default='latest')
-    arg_parser.add_argument('--target-language', action='store', default='cpp', choices=['cpp', 'c'])
-    arg_parser.add_argument('--use-typed-enums', action='store_true')
+    arg_parser.add_argument('--generator', action='store', default='cpp', choices=['cpp', 'c'])
+    arg_parser.add_argument('--no-loader', action='store_false')
+    # arg_parser.add_argument('--use-typed-enums', action='store_true')
     args = arg_parser.parse_args()
 
     download_spec()
+    config.GENERATE_LOADER = args.no_loader
 
     # TODO Separate version major, minor
-    spec_reader = SpecReader('gl.xml')
-    spec_wgl = SpecReader('wgl.xml')
-    spec_glx = SpecReader('glx.xml')
+    spec_reader = SpecReader(args.spec)
 
     available_apis = spec_reader.get_apis()
     print('Available OpenGL API\'s: {}'.format(', '.join(available_apis)))
 
-    config.API = args.api.lower()
+    if args.spec == 'wgl':
+        args.api = 'wgl'
+    elif args.spec == 'glx':
+        args.api = 'glx'
 
+    config.API = args.api.lower()
     print('Selected API: {}'.format(config.API))
 
-    config.PROFILE = args.profile  # argparse already sanitizes the input
+    config.PROFILE = args.profile
     print('Selected profile: {}'.format(config.PROFILE))
 
     versions = spec_reader.get_versions(config.API)
@@ -51,17 +56,16 @@ def main():
         arg_parser.exit(0)
 
     print('Generating loader...')
-
     spec = spec_reader.parse(config.API, config.TARGET_VERSION)
 
-    if args.target_language == 'cpp':
+    if args.generator == 'cpp':
         from Generators.Cpp.Generator import Generator
         Generator(spec).write_files()
-    elif args.target_language == 'c':
+    elif args.generator == 'c':
         from Generators.C.Generator import Generator
         Generator(spec).write_files()
     else:
-        print('{} is not supported'.format(args.target_language))
+        print('Language {} is not supported'.format(args.target_language))
         arg_parser.exit(0)
 
     print('Done!')

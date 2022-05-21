@@ -3,9 +3,11 @@ from Types.Command import Command
 from Types.Enum import Enum
 from Types.Spec import Spec
 
+
 class SpecReader:
-    def __init__(self, file):
-        self.root = ET.parse(file).getroot()
+    def __init__(self, spec):
+        self.root = ET.parse(spec + '.xml').getroot()
+        self.spec = spec
 
     def get_versions(self, api) -> list[str]:
         available_versions = set()
@@ -66,4 +68,4 @@ class SpecReader:
         for type in self.root.findall("./types/type"):
             types.append(ET.tostring(type, method='text', encoding='unicode').strip())  # this is still stupid
 
-        return Spec(enums, commands, target_api, target_version, types)
+        return Spec(self.spec, enums, commands, target_api, target_version, types)

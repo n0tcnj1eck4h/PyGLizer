@@ -10,9 +10,10 @@ class Generator(GeneratorBase):
         self.write_sources()
 
     def write_header(self):
-        file = open("Output/GL.h", mode='w')
-        file.write('#ifndef GLLLE_H\n')
-        file.write('#define GLLLE_H\n')
+        spec_name = self.spec.spec.upper()
+        file = open('Output/{}.h'.format(spec_name), mode='w')
+        file.write('#ifndef {}_H\n'.format(spec_name))
+        file.write('#define {}_H\n'.format(spec_name))
         file.write('#define GLFW_INCLUDE_NONE\n')
         file.write("#ifndef _WINDOWS_\n#undef APIENTRY\n#define APIENTRY\n#endif\n\n")  # whatever
         file.write('#include <stddef.h>\n')
@@ -27,8 +28,8 @@ class Generator(GeneratorBase):
             file.write(f'#define {enum.name} {enum.value}\n')
         file.write('\n\n')
 
-        # Function loader declaration
-        file.write('void loadGL();\n')
+        if config.GENERATE_LOADER:
+            file.write('void load{}();\n'.format(spec_name))
 
         # Write commands
         for command in self.spec.commands:
@@ -38,8 +39,9 @@ class Generator(GeneratorBase):
         file.close()
 
     def write_sources(self):
-        source_file = open("Output/GL.c", mode='w')
-        source_file.write('#include <GL.h>\n')
+        spec_name = self.spec.spec.upper()
+        source_file = open('Output/{}.c'.format(spec_name), mode='w')
+        source_file.write('#include <{}.h>\n'.format(spec_name))
 
         with open('Sources/PlatformConfig.h') as f:
             for line in f:
@@ -60,12 +62,14 @@ class Generator(GeneratorBase):
             source_file.write(self.wrapper_definition(command))
         source_file.write('\n\n')
 
-        source_file.write('void loadGL(){\n')
-        source_file.write("\topen_gl();\n")
-        for command in self.spec.commands:
-            source_file.write(self.loader(command))
-        source_file.write("\tclose_gl();\n")
-        source_file.write('}\n')
+        if config.GENERATE_LOADER:
+            source_file.write('void load{}(){{\n'.format(spec_name))
+            source_file.write("\topen_gl();\n")
+            for command in self.spec.commands:
+                source_file.write(self.loader(command))
+            source_file.write("\tclose_gl();\n")
+            source_file.write('}\n')
+
         source_file.close()
 
     @staticmethod
