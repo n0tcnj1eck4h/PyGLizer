@@ -1,26 +1,25 @@
-# Unnamed OpenGL Loader Generator
-This repository contains my attempt at making an OpenGL Loader in Python for C/C++. If you're looking for an actual loader, please use [glad](https://github.com/Dav1dde/glad).
+#  PyGLizer
+This repository contains my attempt at making an OpenGL Loader Generator for C/C++, written in Python. If you're looking for an actual loader generator, use [glad](https://github.com/Dav1dde/glad).
 
 
-Unlike [glad](https://github.com/Dav1dde/glad), this generator uses inline functions instead of `#define`'s, which allows for less awkward autocompletion in most IDE's.
+Unlike [glad](https://github.com/Dav1dde/glad), this generator produces inline functions instead of `#define`'s, which allow for less awkward autocompletion in most IDE's.
 
 
-The script downloads the latest [OpenGL spec](https://www.khronos.org/registry/OpenGL/xml/) from the web, parses it, and outputs two files:
-- GL.h/hpp - Header containing GL types, GL functions and a loader. This file should be placed in the `include` directory of your project.
-- GL.c/cpp - File containing everything else. Add it to your source files.
+The script fetches the latest [OpenGL spec](https://www.khronos.org/registry/OpenGL/xml/) from the web, parses it, and outputs two files:
+- GL.h/hpp - A header containing all OpenGL types, functions and a loader. This file should be placed in the `include` directory of your project.
+- GL.c/cpp - A file containing symbol definitions. Add it to your source files.
 ## Usage
 ```text
-./main.py -h
-usage: main.py [-h] [--api {gl,gles1,gles2,glsc2}] [--profile {core,compatibility}] [--version VERSION] [--target-language {cpp,c}]
-
-Generate an OpenGL Loader header.
-
+  main.py [-h] [--spec {gl,wgl,glx}] [--api {gl,gles1,gles2,glsc2}] [--profile {core,compatibility}] [--version VERSION] [--generator {cpp,c}]
+               [--no-loader]
+               
 options:
-  -h, --help            show this help message and exit
+  --spec {gl,wgl,glx}
   --api {gl,gles1,gles2,glsc2}
   --profile {core,compatibility}
   --version VERSION
-  --target-language {cpp,c}
+  --generator {cpp,c}
+  --no-loader
 ```
 None of the arguments are required. By default, a header for the latest core version of OpenGL gets generated.
 
