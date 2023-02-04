@@ -1,5 +1,5 @@
-from Types.Enum import Enum
-from Types.Command import Command
+from .enum import Enum
+from .command import Command
 
 
 class Spec:

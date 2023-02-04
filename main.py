@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from Types.SpecReader import SpecReader
+from pyglizer.specreader import SpecReader
 from os.path import exists
 import requests
 import argparse
@@ -59,11 +59,11 @@ def main():
     spec = spec_reader.parse(config.API, config.TARGET_VERSION)
 
     if args.generator == 'cpp':
-        from Generators.Cpp.Generator import Generator
-        Generator(spec).write_files()
+        from pyglizer.generators import CPPGenerator
+        CPPGenerator(spec).write_files()
     elif args.generator == 'c':
-        from Generators.C.Generator import Generator
-        Generator(spec).write_files()
+        from pyglizer.generators import CGenerator
+        CGenerator(spec).write_files()
     else:
         print('Language {} is not supported'.format(args.target_language))
         arg_parser.exit(0)

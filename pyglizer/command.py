@@ -1,4 +1,4 @@
-from Types.Argument import Argument
+from .argument import Argument
 
 
 class Command:

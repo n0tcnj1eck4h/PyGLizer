@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
-from Types.Command import Command
-from Types.Enum import Enum
-from Types.Spec import Spec
+from .command import Command
+from .enum import Enum
+from .spec import Spec
 
 
 class SpecReader:
