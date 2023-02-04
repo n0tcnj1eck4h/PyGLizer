@@ -1,3 +1,4 @@
+from pathlib import Path
 import xml.etree.ElementTree as ET
 from .command import Command
 from .enum import Enum
@@ -6,7 +7,8 @@ from .specinfo import SpecInfo
 
 class SpecParser:
     def __init__(self, spec):
-        self.root = ET.parse(spec + '.xml').getroot()
+        # TODO: this is awful
+        self.root = ET.parse(Path(__file__).parent.parent / 'cache' / (spec + '.xml')).getroot()
         self.spec = spec
 
     def get_versions(self, api) -> list[str]:

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from pathlib import Path
 from pyglizer.specparser import SpecParser
 from os.path import exists
 import requests
@@ -11,7 +12,7 @@ def download_spec():
     for file in ('gl.xml', 'wgl.xml', 'glx.xml'):
         if not exists(file):
             spec = requests.get('https://www.khronos.org/registry/OpenGL/xml/{}'.format(file))
-            open(file, 'wb').write(spec.content)
+            open(Path(__file__).parent / 'cache' / file, 'wb').write(spec.content)
 
 
 def main():
