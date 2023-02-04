@@ -1,3 +1,4 @@
+from pathlib import Path
 import config
 from .base import GeneratorBase
 from ..command import Command
@@ -15,6 +16,7 @@ class CPPGenerator(GeneratorBase):
         file.write('#define {}_H\n'.format(spec_name))
         file.write('#define GLFW_INCLUDE_NONE\n')
         file.write("#ifndef _WINDOWS_\n#undef APIENTRY\n#define APIENTRY\n#endif\n\n")  # whatever
+        file.write('#include <cstddef>\n')
 
         for type in self.spec.types:
             file.write(type)  # this is stupid
@@ -44,15 +46,14 @@ class CPPGenerator(GeneratorBase):
     def write_sources(self):
         spec_name = self.spec.spec.upper()
         source_file = open('{}.cpp'.format(spec_name), mode='w')
-        source_file.write('#include <{}.hpp>\n'.format(spec_name))
-        source_file.write('#define NULL 0\n')
+        source_file.write('#include "{}.hpp"\n'.format(spec_name))
 
-        with open('sources/PlatformConfig.h') as f:
+        with open(Path(__file__).parent / 'sources' / 'PlatformConfig.h') as f:
             for line in f:
                 source_file.write(line)
         source_file.write('\n\n')
 
-        with open('sources/LibraryHandler.cpp') as f:
+        with open(Path(__file__).parent / 'sources' / 'LibraryHandler.cpp') as f:
             for line in f:
                 source_file.write(line)
         source_file.write('\n\n')

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from pyglizer.specreader import SpecReader
+from pyglizer.specparser import SpecParser
 from os.path import exists
 import requests
 import argparse
@@ -29,7 +29,7 @@ def main():
     config.GENERATE_LOADER = args.no_loader
 
     # TODO Separate version major, minor
-    spec_reader = SpecReader(args.spec)
+    spec_reader = SpecParser(args.spec)
 
     available_apis = spec_reader.get_apis()
     print('Available OpenGL API\'s: {}'.format(', '.join(available_apis)))

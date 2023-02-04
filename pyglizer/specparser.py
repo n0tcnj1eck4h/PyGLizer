@@ -1,10 +1,10 @@
 import xml.etree.ElementTree as ET
 from .command import Command
 from .enum import Enum
-from .spec import Spec
+from .specinfo import SpecInfo
 
 
-class SpecReader:
+class SpecParser:
     def __init__(self, spec):
         self.root = ET.parse(spec + '.xml').getroot()
         self.spec = spec
@@ -68,4 +68,4 @@ class SpecReader:
         for type in self.root.findall("./types/type"):
             types.append(ET.tostring(type, method='text', encoding='unicode').strip())  # this is still stupid
 
-        return Spec(self.spec, enums, commands, target_api, target_version, types)
+        return SpecInfo(self.spec, enums, commands, target_api, target_version, types)

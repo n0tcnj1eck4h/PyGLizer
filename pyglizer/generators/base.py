@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
-from ..spec import Spec
+from ..specinfo import SpecInfo
 
 
 class GeneratorBase(ABC):
-    def __init__(self, spec: Spec):
+    def __init__(self, spec: SpecInfo):
         self.spec = spec
 
     @abstractmethod

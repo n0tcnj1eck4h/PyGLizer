@@ -1,6 +1,7 @@
 import config
 from .base import GeneratorBase
 from ..command import Command
+from pathlib import Path
 
 
 class CGenerator(GeneratorBase):
@@ -40,14 +41,14 @@ class CGenerator(GeneratorBase):
     def write_sources(self):
         spec_name = self.spec.spec.upper()
         source_file = open('{}.c'.format(spec_name), mode='w')
-        source_file.write('#include <{}.h>\n'.format(spec_name))
+        source_file.write('#include "{}.h"\n'.format(spec_name))
 
-        with open('sources/PlatformConfig.h') as f:
+        with open(Path(__file__).parent / 'sources' / 'PlatformConfig.h') as f:
             for line in f:
                 source_file.write(line)
         source_file.write('\n\n')
 
-        with open('sources/LibraryHandler.c') as f:
+        with open(Path(__file__).parent / 'sources' / 'LibraryHandler.c') as f:
             for line in f:
                 source_file.write(line)
         source_file.write('\n\n')
