@@ -1,5 +1,6 @@
 from pathlib import Path
-import config
+
+from config import INTERNAL_COMMAND_PREFIX
 from .base import GeneratorBase
 from ..command import Command
 
@@ -10,16 +11,16 @@ class CPPGenerator(GeneratorBase):
         self.write_sources()
 
     def write_header(self):
-        spec_name = self.spec.spec.upper()
-        file = open('{}.hpp'.format(spec_name), mode='w')
-        file.write('#ifndef {}_H\n'.format(spec_name))
-        file.write('#define {}_H\n'.format(spec_name))
+        name = self.spec.api.upper()
+        file = open('{}.hpp'.format(name), mode='w')
+        file.write('#ifndef {}_H\n'.format(name))
+        file.write('#define {}_H\n'.format(name))
         file.write('#define GLFW_INCLUDE_NONE\n')
         file.write("#ifndef _WINDOWS_\n#undef APIENTRY\n#define APIENTRY\n#endif\n\n")  # whatever
         file.write('#include <cstddef>\n')
 
-        for type in self.spec.types:
-            file.write(type)  # this is stupid
+        for type_def in self.spec.types:
+            file.write(type_def)  # this is stupid
             file.write('\n')
         file.write('\n\n')  # TODO apientry
 
@@ -28,8 +29,8 @@ class CPPGenerator(GeneratorBase):
             file.write(f'#define {enum.name} {enum.value}\n')
         file.write('\n\n')
 
-        if config.GENERATE_LOADER:
-            file.write('void load{}();\n'.format(spec_name))
+        if self.generate_loader:
+            file.write('void load{}();\n'.format(name))
 
         for command in self.spec.commands:
             file.write(self.typedef(command))
@@ -44,9 +45,9 @@ class CPPGenerator(GeneratorBase):
         file.close()
 
     def write_sources(self):
-        spec_name = self.spec.spec.upper()
-        source_file = open('{}.cpp'.format(spec_name), mode='w')
-        source_file.write('#include "{}.hpp"\n'.format(spec_name))
+        name = self.spec.api.upper()
+        source_file = open('{}.cpp'.format(name), mode='w')
+        source_file.write('#include "{}.hpp"\n'.format(name))
 
         with open(Path(__file__).parent / 'sources' / 'PlatformConfig.h') as f:
             for line in f:
@@ -62,8 +63,8 @@ class CPPGenerator(GeneratorBase):
             source_file.write(self.pointer_definition(command))
         source_file.write('\n\n')
 
-        if config.GENERATE_LOADER:
-            source_file.write(f'void load{spec_name}(){{\n')
+        if self.generate_loader:
+            source_file.write(f'void load{name}(){{\n')
             source_file.write("\topen_gl();\n")
             for command in self.spec.commands:
                 source_file.write(self.loader(command))
@@ -84,7 +85,7 @@ class CPPGenerator(GeneratorBase):
 
     @classmethod
     def internal_pointer_name(cls, command: Command):
-        return f'{config.INTERNAL_COMMAND_PREFIX}{command.name.lower()}'
+        return f'{INTERNAL_COMMAND_PREFIX}{command.name.lower()}'
 
     @classmethod
     def pointer_declaration(cls, command: Command):

@@ -1,17 +1,15 @@
-from pathlib import Path
-import xml.etree.ElementTree as ET
+from io import IOBase
+from xml.etree.ElementTree import Element, parse, tostring
 from .command import Command
 from .enum import Enum
 from .specinfo import SpecInfo
 
 
 class SpecParser:
-    def __init__(self, spec):
-        # TODO: this is awful
-        self.root = ET.parse(Path(__file__).parent.parent / 'cache' / (spec + '.xml')).getroot()
-        self.spec = spec
+    def __init__(self, source: IOBase):
+        self.root: Element = parse(source).getroot()
 
-    def get_versions(self, api) -> list[str]:
+    def get_versions(self, api: str) -> list[str]:
         available_versions = set()
         for feature in self.root.findall(f"./feature[@api='{api}']"):
             available_versions.add(feature.attrib['number'])
@@ -27,15 +25,15 @@ class SpecParser:
         available_apis.sort()
         return available_apis
 
-    def parse(self, target_api, target_version):
+    def parse(self, api: str, version: str):
         required_enums: list[str] = []
         required_commands: list[str] = []
         enums: list[Enum] = []
         commands: list[Command] = []
         types: list[str] = []
 
-        for feature in self.root.findall(f"./feature[@api='{target_api}']"):
-            if feature.attrib['number'] > target_version:
+        for feature in self.root.findall(f"./feature[@api='{api}']"):
+            if feature.attrib['number'] > version:
                 continue
 
             for requirement in feature.findall('./require/enum'):
@@ -62,12 +60,12 @@ class SpecParser:
 
             params = []
             for param_node in command_node.findall('./param'):
-                params.append(ET.tostring(param_node, method='text', encoding='unicode').strip())
+                params.append(tostring(param_node, method='text', encoding='unicode').strip())
 
             commands.append(Command(command_name, return_type, params))
 
         # TODO apientry
         for type in self.root.findall("./types/type"):
-            types.append(ET.tostring(type, method='text', encoding='unicode').strip())  # this is still stupid
+            types.append(tostring(type, method='text', encoding='unicode').strip())  # this is still stupid
 
-        return SpecInfo(self.spec, enums, commands, target_api, target_version, types)
+        return SpecInfo(api, version, enums, commands, types)

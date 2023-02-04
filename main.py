@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+from typing import Literal
+from pyglizer.generators import get_generator
 from pyglizer.specparser import SpecParser
 from os.path import exists
 import requests
 import argparse
-import config
 
 
-def download_spec():
-    for file in ('gl.xml', 'wgl.xml', 'glx.xml'):
-        if not exists(file):
-            spec = requests.get('https://www.khronos.org/registry/OpenGL/xml/{}'.format(file))
-            open(Path(__file__).parent / 'cache' / file, 'wb').write(spec.content)
+def download_spec(spec: Literal['gl', 'wgl', 'glx']):
+    filename = Path(__file__).parent / 'cache' / (spec + '.xml')
+    if not exists(filename):
+        res = requests.get('https://www.khronos.org/registry/OpenGL/xml/{}'.format(filename))
+        open(filename, 'wb').write(res.content)
+    return open(filename, 'r')
 
 
 def main():
@@ -22,52 +24,34 @@ def main():
     arg_parser.add_argument('--profile', action='store', default='core', choices=['core', 'compatibility'])
     arg_parser.add_argument('--version', action='store', default='latest')
     arg_parser.add_argument('--generator', action='store', default='cpp', choices=['cpp', 'c'])
-    arg_parser.add_argument('--no-loader', action='store_false')
+    arg_parser.add_argument('--no-loader', action='store_true')
     # arg_parser.add_argument('--use-typed-enums', action='store_true')
     args = arg_parser.parse_args()
 
-    download_spec()
-    config.GENERATE_LOADER = args.no_loader
+    # only the gl spec has an api choice
+    if args.spec != 'gl':
+        args.api = args.spec
 
-    # TODO Separate version major, minor
-    spec_reader = SpecParser(args.spec)
+    parser = SpecParser(download_spec(args.spec))
+    apis = parser.get_apis()
+    versions = parser.get_versions(args.api)
 
-    available_apis = spec_reader.get_apis()
-    print('Available OpenGL API\'s: {}'.format(', '.join(available_apis)))
-
-    if args.spec == 'wgl':
-        args.api = 'wgl'
-    elif args.spec == 'glx':
-        args.api = 'glx'
-
-    config.API = args.api.lower()
-    print('Selected API: {}'.format(config.API))
-
-    config.PROFILE = args.profile
-    print('Selected profile: {}'.format(config.PROFILE))
-
-    versions = spec_reader.get_versions(config.API)
-    config.TARGET_VERSION = versions[-1] if args.version == 'latest' else \
+    version = versions[-1] if args.version == 'latest' else \
         ([versions[0]] + [x for x in versions if x <= args.version])[-1]  # hmmm yes this is very evil
 
-    print('Available versions for OpenGL profile {}: {}'.format(config.PROFILE, ', '.join(map(str, versions))))
-    print('Selected version: {}'.format(config.TARGET_VERSION))
-    if config.TARGET_VERSION not in versions:
+    if version not in versions:
         print("No such version exists!")
-        arg_parser.exit(0)
+        arg_parser.exit(1)
 
+    print('Available OpenGL API\'s: {}'.format(', '.join(apis)))
+    print('Selected API: {}'.format(args.api))
+    print('Selected profile: {}'.format(args.profile))
+    print('Available versions for OpenGL {} profile: {}'.format(args.profile, ', '.join(versions)))
+    print('Selected version: {}'.format(version))
     print('Generating loader...')
-    spec = spec_reader.parse(config.API, config.TARGET_VERSION)
 
-    if args.generator == 'cpp':
-        from pyglizer.generators import CPPGenerator
-        CPPGenerator(spec).write_files()
-    elif args.generator == 'c':
-        from pyglizer.generators import CGenerator
-        CGenerator(spec).write_files()
-    else:
-        print('Language {} is not supported'.format(args.target_language))
-        arg_parser.exit(0)
+    spec_info = parser.parse(args.api, version)
+    get_generator(args.generator, spec_info, not args.no_loader).write_files()
 
     print('Done!')
     arg_parser.exit(0)

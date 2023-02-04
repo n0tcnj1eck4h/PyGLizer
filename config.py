@@ -1,5 +1,1 @@
-TARGET_VERSION = '3.3'
-API = 'gl'
-PROFILE = 'core'
-INTERNAL_COMMAND_PREFIX = "_gl_loader_"
-GENERATE_LOADER = True
+INTERNAL_COMMAND_PREFIX = "_pyglizer_"

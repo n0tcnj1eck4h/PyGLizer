@@ -1,4 +1,4 @@
-import config
+from config import INTERNAL_COMMAND_PREFIX
 from .base import GeneratorBase
 from ..command import Command
 from pathlib import Path
@@ -10,10 +10,10 @@ class CGenerator(GeneratorBase):
         self.write_sources()
 
     def write_header(self):
-        spec_name = self.spec.spec.upper()
-        file = open('{}.h'.format(spec_name), mode='w')
-        file.write('#ifndef {}_H\n'.format(spec_name))
-        file.write('#define {}_H\n'.format(spec_name))
+        name = self.spec.api.upper()
+        file = open('{}.h'.format(name), mode='w')
+        file.write('#ifndef {}_H\n'.format(name))
+        file.write('#define {}_H\n'.format(name))
         file.write('#define GLFW_INCLUDE_NONE\n')
         file.write("#ifndef _WINDOWS_\n#undef APIENTRY\n#define APIENTRY\n#endif\n\n")  # whatever
         file.write('#include <stddef.h>\n')
@@ -28,8 +28,8 @@ class CGenerator(GeneratorBase):
             file.write(f'#define {enum.name} {enum.value}\n')
         file.write('\n\n')
 
-        if config.GENERATE_LOADER:
-            file.write('void load{}();\n'.format(spec_name))
+        if self.generate_loader:
+            file.write('void load{}();\n'.format(name))
 
         # Write commands
         for command in self.spec.commands:
@@ -39,9 +39,9 @@ class CGenerator(GeneratorBase):
         file.close()
 
     def write_sources(self):
-        spec_name = self.spec.spec.upper()
-        source_file = open('{}.c'.format(spec_name), mode='w')
-        source_file.write('#include "{}.h"\n'.format(spec_name))
+        name = self.spec.api.upper()
+        source_file = open('{}.c'.format(name), mode='w')
+        source_file.write('#include "{}.h"\n'.format(name))
 
         with open(Path(__file__).parent / 'sources' / 'PlatformConfig.h') as f:
             for line in f:
@@ -62,8 +62,8 @@ class CGenerator(GeneratorBase):
             source_file.write(self.wrapper_definition(command))
         source_file.write('\n\n')
 
-        if config.GENERATE_LOADER:
-            source_file.write('void load{}(){{\n'.format(spec_name))
+        if self.generate_loader:
+            source_file.write('void load{}(){{\n'.format(name))
             source_file.write("\topen_gl();\n")
             for command in self.spec.commands:
                 source_file.write(self.loader(command))
@@ -83,7 +83,7 @@ class CGenerator(GeneratorBase):
 
     @classmethod
     def internal_pointer_name(cls, command: Command):
-        return f'{config.INTERNAL_COMMAND_PREFIX}{command.name.lower()}'
+        return f'{INTERNAL_COMMAND_PREFIX}{command.name.lower()}'
 
     @classmethod
     def pointer_definition(cls, command: Command):
