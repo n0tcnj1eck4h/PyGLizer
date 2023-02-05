@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pyglizer.specinfo import SpecInfo
+from ..specinfo import SpecInfo
 from .base import GeneratorBase
 from .c import CGenerator
 from .cpp import CPPGenerator

@@ -1,7 +1,7 @@
 from io import IOBase
 from xml.etree.ElementTree import Element, parse, tostring
 from .command import Command
-from .enum import Enum
+from .glenum import GLEnum
 from .specinfo import SpecInfo
 
 
@@ -28,7 +28,7 @@ class SpecParser:
     def parse(self, api: str, version: str):
         required_enums: list[str] = []
         required_commands: list[str] = []
-        enums: list[Enum] = []
+        enums: list[GLEnum] = []
         commands: list[Command] = []
         types: list[str] = []
 
@@ -44,7 +44,7 @@ class SpecParser:
 
         for required_enum in required_enums:
             enum_node = self.root.find(f"./enums/enum[@name='{required_enum}']")
-            enum = Enum(enum_node.attrib['name'], enum_node.attrib['value'])
+            enum = GLEnum(enum_node.attrib['name'], enum_node.attrib['value'])
             if 'group' in enum_node.attrib.keys():
                 enum.group = enum_node.attrib['group']
             enums.append(enum)
