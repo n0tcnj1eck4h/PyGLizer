@@ -12,7 +12,7 @@ import argparse
 def download_spec(spec: Literal['gl', 'wgl', 'glx']):
     filename = Path(__file__).parent / 'cache' / (spec + '.xml')
     if not exists(filename):
-        res = requests.get('https://www.khronos.org/registry/OpenGL/xml/{}'.format(filename))
+        res = requests.get('https://www.khronos.org/registry/OpenGL/xml/{}.xml'.format(spec))
         open(filename, 'wb').write(res.content)
     return open(filename, 'r')
 
